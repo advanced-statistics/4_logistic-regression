@@ -71,7 +71,7 @@ glimpse(hbat_fix)
 hbat_fix %>%
   group_by(x4) %>%
   count() %>%
-  ggplot(aes(x = x4, y =n,  fill = x4 )) +
+  ggplot(aes(x = x4, y =n,  fill = x4)) +
   geom_col() +
   geom_text(aes(label=n), position=position_stack(0.5))
 ```
@@ -79,7 +79,7 @@ hbat_fix %>%
 # Create Linear Regression Model
 ```{r}
 # Create Linear Regression Model
-lr <- glm(x23 ~ x13 + x17 , data = hbat_fix, family = binomial)
+lr <- glm(x4 ~ x13 + x17 , data = hbat_fix, family = binomial)
 ```
 
 # See The Model
@@ -92,7 +92,7 @@ summary(lr)
 # Visualize the model
 hbat_fix %>%
   mutate(prob = ifelse(x4 == "Outside North America", 0, 1)) %>%
-  ggplot(aes(x = x13, y =  prob)) +
+  ggplot(aes(x = x13, y = prob)) +
   geom_point() +
   geom_smooth(method = "glm", method.args = list(family = "binomial"), se = FALSE) +
   labs(x = "X13", y = "Probabilities x4")

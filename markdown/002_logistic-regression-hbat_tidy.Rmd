@@ -46,7 +46,7 @@ hbat_split %>%
 ```{r}
 # Create Recipe
 hbat_recipe <- training(hbat_split) %>%
-  recipe(x23 ~ x3 + x13 + x17) %>%
+  recipe(x4 ~ x3 + x13 + x17) %>%
   prep()
 
 hbat_recipe

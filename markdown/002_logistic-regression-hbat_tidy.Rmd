@@ -1,0 +1,109 @@
+---
+title: "Logistics Regression - Tidy Models"
+author: "Muhammad Apriandito"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Install Packages
+```{r}
+# Install Packages
+install.packages("tidyverse")
+install.packages("tidymodels")
+install.packages("skimr")
+```
+# Load Packages
+```{r}
+# Load Packages
+library(tidyverse)
+library(tidymodels)
+library(skimr)
+```
+
+# Import data
+```{r}
+# Import HBAT Data 
+hbat <- read_csv("data/hbat.csv")
+```
+
+# Split Data
+```{r}
+hbat_split <- initial_split(hbat, prop = 0.8)
+hbat_split
+```
+
+```{r}
+# See training data
+hbat_split %>%
+  training() %>%
+  glimpse()
+```
+
+# Prepare The Data
+```{r}
+# Create Recipe
+hbat_recipe <- training(hbat_split) %>%
+  recipe(x23 ~ x3 + x13 + x17) %>%
+  prep()
+
+hbat_recipe
+```
+
+```{r}
+# Juice
+hbat_training <- juice(hbat_recipe)
+glimpse(hbat_training)
+```
+
+```{r}
+# Menerapkan ke data testing
+hbat_testing <- hbat_recipe %>%
+  bake(testing(hbat_split)) 
+glimpse(hbat_testing)
+```
+
+# Create Model
+```{r}
+lr <- logistic_reg(mode = "classification") %>%
+  set_engine("glm") %>%
+  fit(x4 ~ x13 + x17, data = hbat_training)
+```
+
+```{r}
+lr %>%
+  predict(hbat_testing) %>%
+  bind_cols(hbat_testing)
+```
+
+```{r}
+# Confusion Matrix
+lr %>%
+  predict(hbat_testing) %>%
+  bind_cols(hbat_testing) %>%
+  conf_mat(truth = x4, estimate = .pred_class)
+```
+
+```{r}
+# Accuracy & Kappa
+lr %>%
+  predict(hbat_testing) %>%
+  bind_cols(hbat_testing) %>%
+  metrics(truth = x4, estimate = .pred_class)
+```
+
+# Predict New Data
+```{r}
+# Making Data For Prediction
+df_new <- tibble("x13" =6.8, "x17" =5)
+df_new
+```
+
+```{r}
+lr %>%
+  predict(df_new) %>%
+  bind_cols(df_new)
+```
+

@@ -1,0 +1,132 @@
+---
+title: "Logistic Regression - HBAT"
+author: "Muhammad Apriandito"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Install Packages
+```{r}
+# Install Packages
+install.packages("tidyverse")
+install.packages("modEvA")
+install.packages("skimr")
+install.packages("regclass")
+```
+
+# Load Packages
+```{r}
+# Load Packages
+library(tidyverse)
+library(modEvA)
+library(skimr)
+library(regclass)
+```
+
+# Import data
+```{r}
+# Import HBAT Data 
+hbat <- read_csv("data/hbat.csv")
+```
+
+# Explore The Data
+```{r}
+# See the Data
+hbat
+```
+
+```{r}
+# Check The Data using glimpse
+glimpse(hbat)
+```
+
+```{r}
+# Check Data using summary
+summary(hbat)
+```
+
+```{r}
+# Check The Data using skimr
+skim(hbat)
+```
+
+# Fix the Data
+```{r}
+# Remove Uneeded Variable
+hbat_fix <- hbat %>%
+  select(-X1) %>%
+  mutate_if(is.character, as_factor)
+```
+
+```{r}
+# Check the Data Again
+glimpse(hbat_fix)
+```
+
+# Explore With Visualization
+```{r}
+hbat_fix %>%
+  group_by(x4) %>%
+  count() %>%
+  ggplot(aes(x = x4, y =n,  fill = x4 )) +
+  geom_col() +
+  geom_text(aes(label=n), position=position_stack(0.5))
+```
+
+# Create Linear Regression Model
+```{r}
+# Create Linear Regression Model
+lr <- glm(x23 ~ x13 + x17 , data = hbat_fix, family = binomial)
+```
+
+# See The Model
+```{r}
+# See The Model 
+summary(lr)
+```
+
+```{r}
+# Visualize the model
+hbat_fix %>%
+  mutate(prob = ifelse(x4 == "Outside North America", 0, 1)) %>%
+  ggplot(aes(x = x13, y =  prob)) +
+  geom_point() +
+  geom_smooth(method = "glm", method.args = list(family = "binomial"), se = FALSE) +
+  labs(x = "X13", y = "Probabilities x4")
+```
+
+```{r}
+# Visualize the model
+hbat_fix %>%
+  mutate(prob = ifelse(x4 == "Outside North America", 0, 1)) %>%
+  ggplot(aes(x = x17, y =  prob)) +
+  geom_point() +
+  geom_smooth(method = "glm", method.args = list(family = "binomial"), se = FALSE) +
+  labs(x = "X13", y = "Probabilities x4")
+```
+
+```{r}
+lr_probs <- predict(lr, type = "response")
+lr_probs
+```
+
+```{r}
+# Confussion Matrix
+confusion_matrix(lr)
+```
+
+# Making Prediction
+```{r}
+# Making Data For Prediction
+df <- tibble("x13" =6.8, "x17" =5)
+df
+```
+
+```{r}
+# Predict
+predict(lr, df, type = "response")
+```
+
